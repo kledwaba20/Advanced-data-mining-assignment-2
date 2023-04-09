@@ -1,0 +1,83 @@
+---
+title: "Advanced DM Assignment two final"
+author: "Khutso Ledwaba"
+date: "2023-03-21"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+library('ISLR') 
+library('dplyr') 
+library('glmnet') 
+library('caret')
+library('tree')
+library('class')
+
+
+Carseats <- Carseats
+
+Carseats_Filtered <- Carseats %>% select("Sales", "Price", "Advertising","Population","Age","Income","Education")
+
+##Question 1
+
+# Build the decision tree regression model
+tree.sales <- tree(Sales ~ ., data = Carseats_Filtered)
+
+# Plot the decision tree
+plot(tree.sales)
+text(tree.sales, pretty = 0)
+
+##Question 2
+
+# Create a data frame with the input record
+newdata <- data.frame(Sales = 9, Price = 6.54, Population = 124,Advertising = 0,Age = 76,Income = 110,Education = 10)
+
+# Use the predict() function to estimate the Sales
+predicted.sales <- predict(tree.sales, newdata = newdata)
+
+# Print the estimated Sales
+cat("The estimated Sales for the given input record is ", round(predicted.sales, 3), ".")
+
+##Question 3
+#We will use the train() function from the caret package to train a random forest model for the carseats dataset. We will use the method = "rf" argument to specify the random forest method.
+
+
+rf.sales <- train(Sales ~ .,data = Carseats_Filtered, method = "rf")
+
+#Finding the Optimal Value of mtry
+rf.sales
+
+##Question 4
+
+#Customizing the Search Grid
+
+# Create the search grid
+grid <- expand.grid(mtry = c(2, 3, 5))
+
+# Specify the cross-validation settings
+ctrl <- trainControl(
+  method = "repeatedcv",
+  repeats = 3,
+  number = 5,
+  verboseIter = TRUE
+)
+
+# Train the model with the customized search grid
+rf.sales <- train(
+  Sales ~ .,
+  data = Carseats_Filtered,
+  method = "rf",
+  trControl = ctrl,
+  tuneGrid = grid
+)
+
+# Print the results
+rf.sales
+```
